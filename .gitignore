@@ -128,5 +128,6 @@ allitems.csv
 config.ini
 kb_v2-cve.csv
 qualysCVEPairs.csv
+ScanSchedules.*
 trashsoon.csv
 vulnTrash.xml
