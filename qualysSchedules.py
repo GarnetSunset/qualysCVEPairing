@@ -5,10 +5,7 @@ import requests
 import sys
 import xlsxwriter
 
-# IMPORTANT: this program needs about 150mb of space in the directory the script is kept in throughout it's runtime,
-# from start to end, the space will be given back after the process has completed.
-# I realize this isn't the most efficient way to handle this but I wrote this with legacy Python2 systems 
-# without the ability to install modules in mind. If you'd like to make a fork using pandas, feel free. :)
+# Program to get the upcoming scan schedules and put them into a CSV and then an XLSX
 
 if os.path.exists('config.ini'):
     with open('config.ini', 'r') as file:
@@ -169,3 +166,6 @@ with open("ScanSchedules.csv",'r') as csvfile:
         ws.write_row(i, 0, decoded)
         i += 1
 wb.close()
+
+# Delete the XML
+os.remove("ScanSchedules.xml")
