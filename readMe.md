@@ -12,3 +12,7 @@ Feel free to let me know what I can do to make this a lil more clean. My plan is
 ## kb_v2-cve2csv.xsl
 
 This is a file created by Qualys that allows an XML file to be converted into a CSV. If anyone from Qualys wishes to have this file taken down, let me know. Contact me via my Twitter of the same handle. My messages are open and I'm more than willing, but I didn't see anything barring this. :)
+
+## Config.ini
+Create a file called config.ini and put your username and password in this format
+>username:password
