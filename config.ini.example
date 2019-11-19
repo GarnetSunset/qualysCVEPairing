@@ -22,5 +22,4 @@ Requestor_Phone= # whats your digits girl
 RequestorEmail= # your email, also why the hell isnt this named "Requestor_Email" wtf
 ShortDescPrefix= # something to append to the beginning of the short desc, a la "vulnscan - ", empty for nah
 Status= # should be new but you do you
-Submitter= # who made this
 TypeOfChange= # nominal etc
