@@ -1,6 +1,26 @@
-username:password
-11/12/2019-11/17/2019,12/11/2019-12/22/2019,12/29/2019-1/3/2020 # dates to NOT curate remedy tickets between
-# wsdl prod
-# wsdl QA (if applicable, otherwise leave blank)
-# put QA or PROD here
-# todo - all required shit for a CM
+loginInfo= # username:password
+blockDates= # 11/12/2019-11/17/2019,12/11/2019-12/22/2019,12/29/2019-1/3/2020 # dates to NOT curate remedy tickets between, leave blank for no
+prodWSDL= # wsdl prod, or whatever your WSDL for your remedy server is
+qaWSDL= # wsdl QA (if applicable, otherwise leave blank)
+env= # put QA or PROD here
+AssociatedDivision= # who do you work for? security i assume
+Back-out_Instructions= # instructions for backout
+ChangeDescription= # Why are you doing this? 
+Changes_Planned= # Changes planned, duh
+Country= # Insert Country here bruh
+CustFacing_CustSupporting= # I believe the only options are "Production" or "Corporate"
+Impact= #nominal,minor,etc
+ImpactCategory= #nominal=0, minor=1, etc
+KnownImpact= # what will it hit/ what might it take down?
+ReasonForChange= # Are you doing this for PCI? Regular compliance? Write it here.
+Region= # what region i think its an int coded as a string btw
+remedyrequestor= # who requested this ticket (your username)
+Requestor= #who requested this ticket
+ResponsibleGroup= # what remedy group are you in though
+ResponsibleIndividual= # who is responsible
+Requestor_Phone= # whats your digits girl
+RequestorEmail= # your email, also why the hell isnt this named "Requestor_Email" wtf
+ShortDescPrefix= # something to append to the beginning of the short desc, a la "vulnscan - ", empty for nah
+Status= # should be new but you do you
+Submitter= # who made this
+TypeOfChange= # nominal etc
