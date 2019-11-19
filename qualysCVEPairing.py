@@ -9,11 +9,15 @@ import requests
 # without the ability to install modules in mind. If you'd like to make a fork using pandas, feel free. :)
 
 if os.path.exists('config.ini'):
+    configFile = {}
     with open('config.ini', 'r') as file:
-        userpass = file.readlines()
-        double = userpass[0].split(':')
+        for line in file:
+            (key, val) = line.split('=')
+            configFile[str(key)] = val.rstrip("\n")
+        double = configFile['loginInfo'].split(':')
         username = double[0]
         password = double[1]
+
 else:
     print("Please refer to the readme on how to curate a config")
     quit()
