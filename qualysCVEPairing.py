@@ -10,13 +10,13 @@ import requests
 
 if os.path.exists('config.ini'):
     with open('config.ini', 'r') as file:
-        userpass = file.read().replace('\n','')
-        double = userpass.split(':')
+        userpass = file.readlines()
+        double = userpass[0].split(':')
         username = double[0]
         password = double[1]
 else:
     print("Please refer to the readme on how to curate a config")
-    exit()
+    quit()
 
 # Qualys API for knowledgebase
 QualysURL = 'https://qualysapi.qualys.com/api/2.0/fo/knowledge_base/vuln/'
