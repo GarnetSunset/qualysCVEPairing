@@ -10,9 +10,12 @@ def qualysSchedules():
     # Program to get the upcoming scan schedules and put them into a CSV and then an XLSX
 
     if os.path.exists('config.ini'):
+        configFile = {}
         with open('config.ini', 'r') as file:
-            userpass = file.readlines()
-            double = userpass[0].split(':')
+            for line in file:
+                (key, val) = line.split('=')
+                configFile[str(key)] = val.rstrip("\n")
+            double = configFile['loginInfo'].split(':')
             username = double[0]
             password = double[1]
     else:
