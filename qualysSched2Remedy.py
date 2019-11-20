@@ -80,6 +80,10 @@ def qualys2remedy():
     except:
         output = codecs.open('ScanSchedules.csv', 'w', encoding='utf8')
     csvwriter = csv.writer(output)
+    
+        # Get Scan XML Root
+    with open('Scans.xml') as fd:
+        scans = xmltodict.parse(fd.read(), process_namespaces=True, dict_constructor=dict) 
 
     # Go through XML and pull out important stuff, put it in a CSV
     for member in root.findall('RESPONSE/SCHEDULE_SCAN_LIST/SCAN'):
@@ -257,8 +261,24 @@ def qualys2remedy():
                 else:
                     Change_Start_Time = dt - datetime.timedelta(hours=5)
                     resultrow['Change_Start_Time'] = str(Change_Start_Time).replace(' ','T')+configFile['timeChange']
-                resultrow['Change_Stop_Time'] = str(Change_Start_Time + datetime.timedelta(hours=4)).replace(' ','T')+configFile['timeChange']
-                
+                    
+                for key in scans['SCAN_LIST_OUTPUT']['RESPONSE']['SCAN_LIST']['SCAN']:
+                    if currentOne[1].replace(' ','') == key['TITLE'].replace(' ',''):
+                        if key['DURATION'] != "Pending":
+                            if "day" in key['DURATION']:
+                                day = key['DURATION'].split('day')
+                                numberOfDays = re.sub("[^0-9]", "", day[0])
+                                timeBits = re.sub("[^0-9:]", "", day[1])
+                                duration = datetime.datetime.strptime(timeBits, '%H:%M:%S')
+                                durSeconds = (duration.hour * 60 + duration.minute) * 60 + duration.second + (int(numberOfDays) * 86400)
+                                resultrow['Change_Stop_Time'] = str(Change_Start_Time + datetime.timedelta(seconds=durSeconds)).replace(' ','T')+"-05:00"
+                            else:
+                                duration = datetime.datetime.strptime(key['DURATION'], '%H:%M:%S')
+                                durSeconds = (duration.hour * 60 + duration.minute) * 60 + duration.second
+                                resultrow['Change_Stop_Time'] = str(Change_Start_Time + datetime.timedelta(seconds=durSeconds)).replace(' ','T')+"-05:00"
+                        else:    
+                            resultrow['Change_Stop_Time'] = str(Change_Start_Time + datetime.timedelta(hours=4)).replace(' ','T')+"-05:00"    
+                            
                 if resultrow['prodvsqa'] == 'PROD':
                     prodvsqa = 'PROD'
                 else:
