@@ -14,7 +14,7 @@ def qualysSchedules():
         with open('config.ini', 'r') as file:
             for line in file:
                 (key, val) = line.split('=')
-                configFile[str(key)] = val.rstrip("\n").replace('"','')
+                configFile[str(key)] = val.rstrip("\n").rstrip("\r").replace('"','')
             double = configFile['loginInfo'].split(':')
             username = double[0]
             password = double[1]
