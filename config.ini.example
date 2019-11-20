@@ -1,3 +1,5 @@
+# make sure to put quotes around everything for readability, though it can read without
+
 loginInfo= # username:password
 blockDates= # 11/12/2019-11/17/2019,12/11/2019-12/22/2019,12/29/2019-1/3/2020 # dates to NOT curate remedy tickets between, leave blank for no
 prodWSDL= # wsdl prod, or whatever your WSDL for your remedy server is
