@@ -190,6 +190,9 @@ def qualys2remedy():
             for item in IDlist:
                 utf8IDList.append(str(item))
             csvwriter.writerow(utf8IDList)
+        else:
+            print("Your password is dead or something like that, please go check your logs")
+            quit()
     output.close()
 
     # Delete the XML
