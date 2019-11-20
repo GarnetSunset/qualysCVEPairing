@@ -65,6 +65,10 @@ def qualys2remedy():
     with requests.Session() as s:
         download = s.get(QualysSchedAPI, headers=headers, params=params, auth=(username, password))
         open('ScanSchedules.xml', 'wb').write(download.content)
+        if "Bad Login" in download.content:
+            print("Your password is dead or something like that, please go check your logs")
+            quit()
+        print(download.content)
      
     # Get Scan Schedules XML Root
     count = 0
