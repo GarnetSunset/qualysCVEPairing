@@ -36,19 +36,7 @@ def qualys2remedy():
             prodvsqa = configFile['env']
     else:
         print("Please refer to the readme on how to curate a config")
-        quit()
-        
-    # Check for existing ScanSched.csv
-    diffMe = False
-    if os.path.isfile('ScanSchedules.csv'):
-        try:   
-            os.remove('ScanSchedules_last.csv')
-        except:
-            pass
-        os.rename('ScanSchedules.csv', 'ScanSchedules_last.csv')
-        diffME = True
-    else:
-        temp = open('ScanSchedules_last.csv', 'wb')    
+        quit() 
 
     # Qualys API for Scan Schedules
     QualysSchedAPI = 'https://qualysapi.qualys.com/api/2.0/fo/schedule/scan/'
@@ -69,7 +57,19 @@ def qualys2remedy():
             print("Your password is dead or something like that, please go check your logs")
             quit()
         print(download.content)
-     
+
+     # Check for existing ScanSched.csv
+    diffMe = False
+    if os.path.isfile('ScanSchedules.csv'):
+        try:   
+            os.remove('ScanSchedules_last.csv')
+        except:
+            pass
+        os.rename('ScanSchedules.csv', 'ScanSchedules_last.csv')
+        diffME = True
+    else:
+        temp = open('ScanSchedules_last.csv', 'wb')   
+    
     # Get Scan Schedules XML Root
     count = 0
     tree = ET.parse("ScanSchedules.xml")
