@@ -68,140 +68,85 @@ def qualys2remedy():
         os.rename('ScanSchedules.csv', 'ScanSchedules_last.csv')
         diffME = True
     else:
-        temp = open('ScanSchedules_last.csv', 'wb')   
-    
+        temp = open('ScanSchedules_last.csv', 'wb')    
+
     # Get Scan Schedules XML Root
-    count = 0
-    tree = ET.parse("ScanSchedules.xml")
-    root = tree.getroot()
-    outputlist = []
     try:
         output = open('ScanSchedules.csv', 'w+', newline='', encoding='utf8')
     except:
         output = codecs.open('ScanSchedules.csv', 'w', encoding='utf8')
     csvwriter = csv.writer(output)
     
-        # Get Scan XML Root
+    # open xml for schedules
+    with open('ScanSchedules.xml') as fd:
+        scansch = xmltodict.parse(fd.read(), process_namespaces=True, dict_constructor=dict)  
+    
+    # open xml for scans
     with open('Scans.xml') as fd:
-        scans = xmltodict.parse(fd.read(), process_namespaces=True, dict_constructor=dict) 
-
-    # Go through XML and pull out important stuff, put it in a CSV
-    for member in root.findall('RESPONSE/SCHEDULE_SCAN_LIST/SCAN'):
-        IDlist = []
-        if member.find('USER_LOGIN').text == configFile['qualysUser'] and member.find('SCHEDULE/NEXTLAUNCH_UTC') != None:
-            if count == 0:
-                ID = "Ticket ID"
-                outputlist.append(ID)
-                TITLE = member.find('TITLE').tag
-                outputlist.append("Short_Description")
-                USERLOGIN = member.find('USER_LOGIN').tag
-                outputlist.append("Requestor")
-                SCHEDULE_START_DATE_UTC = member.find('SCHEDULE/START_DATE_UTC').tag
-                outputlist.append(SCHEDULE_START_DATE_UTC)
-                SCHEDULE_NEXTLAUNCH_UTC = "NEXTLAUNCH_UTC"
-                outputlist.append("Change_Start_Time")
-                NETWORK_ID = member.find('NETWORK_ID').tag
-                outputlist.append(NETWORK_ID)
-                ISCANNER_NAME = member.find('ISCANNER_NAME').tag
-                outputlist.append(ISCANNER_NAME)
-                ASSET_GROUP_TITLE = member.find('ASSET_GROUP_TITLE_LIST/ASSET_GROUP_TITLE').tag
-                outputlist.append(ASSET_GROUP_TITLE)
-                OPTION_PROFILE_TITLE = member.find('OPTION_PROFILE/TITLE').tag
-                outputlist.append(OPTION_PROFILE_TITLE)
-                OPTION_PROFILE_DEFAULT_FLAG = member.find('OPTION_PROFILE/DEFAULT_FLAG').tag
-                outputlist.append(OPTION_PROFILE_DEFAULT_FLAG)
-                PROCESSING_PRIORITY = member.find('PROCESSING_PRIORITY').tag
-                outputlist.append(PROCESSING_PRIORITY)
-                SCHEDULE_MONTHLY = "SCANNED *X*LY"
-                outputlist.append(SCHEDULE_MONTHLY)
-                SCHEDULE_START_HOUR = member.find('SCHEDULE/START_HOUR').tag
-                outputlist.append(SCHEDULE_START_HOUR)
-                SCHEDULE_START_MINUTE = member.find('SCHEDULE/START_MINUTE').tag
-                outputlist.append(SCHEDULE_START_MINUTE)
-                SCHEDULE_TIME_ZONE_CODE = member.find('SCHEDULE/TIME_ZONE/TIME_ZONE_CODE').tag
-                outputlist.append(SCHEDULE_TIME_ZONE_CODE)
-                SCHEDULE_TIME_ZONE_DETAILS = member.find('SCHEDULE/TIME_ZONE/TIME_ZONE_DETAILS').tag
-                outputlist.append(SCHEDULE_TIME_ZONE_DETAILS)
-                SCHEDULE_DST_SELECTED = member.find('SCHEDULE/DST_SELECTED').tag
-                outputlist.append(SCHEDULE_DST_SELECTED)
-                TARGET = member.find('TARGET').tag
-                outputlist.append(TARGET)
-                csvwriter.writerow(outputlist)
-                count = count + 1
-            ID = member.find('ID').text
-            IDlist.append(ID)
-            TITLE = member.find('TITLE').text
-            IDlist.append(TITLE)
-            USERLOGIN = member.find('USER_LOGIN').text
-            IDlist.append(USERLOGIN)
-            SCHEDULE_START_DATE_UTC = member.find('SCHEDULE/START_DATE_UTC').text
-            IDlist.append(SCHEDULE_START_DATE_UTC)
+        scans = xmltodict.parse(fd.read(), process_namespaces=True, dict_constructor=dict)            
+    
+    # make CSVs
+    boilerPlate = ["Ticket ID","Short_Description","Requestor","START_DATE_UTC","Change_Start_Time","Expected End Time","NETWORK_ID","ISCANNER_NAME","ASSET_GROUP_TITLE","TITLE","DEFAULT_FLAG","PROCESSING_PRIORITY","SCANNED *X*LY","START_HOUR","START_MINUTE","TIME_ZONE_CODE","TIME_ZONE_DETAILS","DST_SELECTED","TARGET"]
+    csvwriter.writerow(boilerPlate)
+    for schedules in scansch['SCHEDULE_SCAN_LIST_OUTPUT']['RESPONSE']['SCHEDULE_SCAN_LIST']['SCAN']:
+        try:
+            SCHEDULE_NEXTLAUNCH_UTC = schedules["SCHEDULE"]["NEXTLAUNCH_UTC"]
+        except:
+            SCHEDULE_NEXTLAUNCH_UTC = ""
+        try:
+            ASSET_GROUP_TITLE = schedules["ASSET_GROUP_TITLE_LIST"]["ASSET_GROUP_TITLE"]
+        except:
             try:
-                SCHEDULE_NEXTLAUNCH_UTC = member.find('SCHEDULE/NEXTLAUNCH_UTC').text
-                IDlist.append(SCHEDULE_NEXTLAUNCH_UTC)
-            except:
-                IDlist.append("")
-            NETWORK_ID = member.find('NETWORK_ID').text
-            IDlist.append(NETWORK_ID)
-            ISCANNER_NAME = member.find('ISCANNER_NAME').text
-            IDlist.append(ISCANNER_NAME)
-            try:
-                ASSET_GROUP_TITLE = member.find('ASSET_GROUP_TITLE_LIST/ASSET_GROUP_TITLE').text
-                IDlist.append(ASSET_GROUP_TITLE)
+                STARTIPS = schedules["USER_ENTERED_IPS"]["RANGE"]["START"]
+                ENDIPS = schedules["USER_ENTERED_IPS"]["RANGE"]["END"]
+                ASSET_GROUP_TITLE = "START:" + STARTIPS + " END:" + ENDIPS
             except:
                 try:
-                    STARTIPS = member.find('USER_ENTERED_IPS/RANGE/START').text
-                    ENDIPS = member.find('USER_ENTERED_IPS/RANGE/END').text
-                    IDlist.append("START:" + STARTIPS + " END:" + ENDIPS)
+                    TAG_INCLUDE_SELECTOR = schedules["ASSET_TAGS"]["TAG_INCLUDE_SELECTOR"]
+                    TAG_SET_INCLUDE = schedules["ASSET_TAGS"]["TAG_SET_INCLUDE"]
+                    TAG_EXCLUDE_SELECTOR = schedules["ASSET_TAGS"]["TAG_EXCLUDE_SELECTOR"]
+                    TAG_SET_EXCLUDE = schedules["ASSET_TAGS"]["TAG_SET_EXCLUDE"]
+                    ASSET_GROUP_TITLE = "Include Selector:" + TAG_INCLUDE_SELECTOR + " Set Include:" + TAG_SET_INCLUDE + " Exclude Selector:" + TAG_EXCLUDE_SELECTOR + " Set Exclude:" + TAG_SET_EXCLUDE
                 except:
-                    try:
-                        TAG_INCLUDE_SELECTOR = member.find('ASSET_TAGS/TAG_INCLUDE_SELECTOR').text
-                        TAG_SET_INCLUDE = member.find('ASSET_TAGS/TAG_SET_INCLUDE').text
-                        TAG_EXCLUDE_SELECTOR = member.find('ASSET_TAGS/TAG_EXCLUDE_SELECTOR').text
-                        TAG_SET_EXCLUDE = member.find('ASSET_TAGS/TAG_SET_EXCLUDE').text
-                        IDlist.append("Include Selector:" + TAG_INCLUDE_SELECTOR + " Set Include:" + TAG_SET_INCLUDE + " Exclude Selector:" + TAG_EXCLUDE_SELECTOR + " Set Exclude:" + TAG_SET_EXCLUDE)
-                    except:
-                        IDlist.append("")
-            OPTION_PROFILE_TITLE = member.find('OPTION_PROFILE/TITLE').text
-            IDlist.append(OPTION_PROFILE_TITLE)
-            OPTION_PROFILE_DEFAULT_FLAG = member.find('OPTION_PROFILE/DEFAULT_FLAG').text
-            IDlist.append(OPTION_PROFILE_DEFAULT_FLAG)
-            PROCESSING_PRIORITY = member.find('PROCESSING_PRIORITY').text
-            IDlist.append(PROCESSING_PRIORITY)
+                    ASSET_GROUP_TITLE = ""
+        try:
+            SCHEDULE_LY = schedules["SCHEDULE"]["MONTHLY"]
+            SCHEDULE_LY = "MONTHLY"
+        except:
             try:
-                SCHEDULE_MONTHLY = member.find('SCHEDULE/MONTHLY').tag
-                IDlist.append(SCHEDULE_MONTHLY)
+                SCHEDULE_LY = schedules["SCHEDULE"]["WEEKLY"]
+                SCHEDULE_LY = "WEEKLY"
             except:
                 try:
-                    SCHEDULE_WEEKLY = member.find('SCHEDULE/WEEKLY').tag
-                    IDlist.append(SCHEDULE_WEEKLY)
+                    SCHEDULE_LY = schedules["SCHEDULE"]["DAILY"]
+                    SCHEDULE_LY = "DAILY"
                 except:
-                    try:
-                        SCHEDULE_DAILY = member.find('SCHEDULE/DAILY').tag
-                        IDlist.append(SCHEDULE_DAILY)
-                    except:
-                        IDlist.append("")
-            SCHEDULE_START_HOUR = member.find('SCHEDULE/START_HOUR').text
-            IDlist.append(SCHEDULE_START_HOUR)
-            SCHEDULE_START_MINUTE = member.find('SCHEDULE/START_MINUTE').text
-            IDlist.append(SCHEDULE_START_MINUTE)
-            SCHEDULE_TIME_ZONE_CODE = member.find('SCHEDULE/TIME_ZONE/TIME_ZONE_CODE').text
-            IDlist.append(SCHEDULE_TIME_ZONE_CODE)
-            SCHEDULE_TIME_ZONE_DETAILS = member.find('SCHEDULE/TIME_ZONE/TIME_ZONE_DETAILS').text
-            IDlist.append(SCHEDULE_TIME_ZONE_DETAILS)
-            SCHEDULE_DST_SELECTED = member.find('SCHEDULE/DST_SELECTED').text
-            IDlist.append(SCHEDULE_DST_SELECTED)
-            TARGET = member.find('TARGET').text
-            IDlist.append(TARGET)
-            IDlist[:] = [commie.replace(',', ';') for commie in IDlist]
-            utf8IDList = []
-            for item in IDlist:
-                utf8IDList.append(str(item))
+                    SCHEDULE_LY = ""
+        changeEnd = ""
+        for key in scans['SCAN_LIST_OUTPUT']['RESPONSE']['SCAN_LIST']['SCAN']:
+            if schedules["TITLE"].replace(' ','') == key['TITLE'].replace(' ','') and SCHEDULE_NEXTLAUNCH_UTC != "NEXTLAUNCH_UTC" and SCHEDULE_NEXTLAUNCH_UTC != "":
+                Change_Start_Time = datetime.datetime.strptime(SCHEDULE_NEXTLAUNCH_UTC, '%Y-%m-%dT%H:%M:%S')
+                gotOne = True
+                if key['DURATION'] != "Pending":
+                    if "day" in key['DURATION']:
+                        day = key['DURATION'].split('day')
+                        numberOfDays = re.sub("[^0-9]", "", day[0])
+                        timeBits = re.sub("[^0-9:]", "", day[1])
+                        duration = datetime.datetime.strptime(timeBits, '%H:%M:%S')
+                        durSeconds = (duration.hour * 60 + duration.minute) * 60 + duration.second + (int(numberOfDays) * 86400)
+                        changeEnd = str(Change_Start_Time + datetime.timedelta(seconds=durSeconds)).replace(' ','T')+"-05:00"
+                    else:
+                        duration = datetime.datetime.strptime(key['DURATION'], '%H:%M:%S')
+                        durSeconds = (duration.hour * 60 + duration.minute) * 60 + duration.second
+                        changeEnd = str(Change_Start_Time + datetime.timedelta(seconds=durSeconds)).replace(' ','T')+"-05:00"
+                else:    
+                    changeEnd = str(Change_Start_Time + datetime.timedelta(hours=4)).replace(' ','T')+"-05:00"
+        bigList = [schedules["ID"],schedules["TITLE"],schedules["USER_LOGIN"],schedules["SCHEDULE"]["START_DATE_UTC"],SCHEDULE_NEXTLAUNCH_UTC,changeEnd,schedules["NETWORK_ID"],schedules["ISCANNER_NAME"],ASSET_GROUP_TITLE,schedules["OPTION_PROFILE"]["TITLE"],schedules["OPTION_PROFILE"]["DEFAULT_FLAG"],schedules["PROCESSING_PRIORITY"],SCHEDULE_LY,schedules["SCHEDULE"]["START_HOUR"],schedules["SCHEDULE"]["START_MINUTE"],schedules["SCHEDULE"]["TIME_ZONE"]["TIME_ZONE_CODE"],schedules["SCHEDULE"]["TIME_ZONE"]["TIME_ZONE_DETAILS"],schedules["SCHEDULE"]["DST_SELECTED"],schedules["TARGET"]]
+        utf8IDList = []
+        for item in bigList:
+            utf8IDList.append(str(item).replace(',',';'))
+        if SCHEDULE_NEXTLAUNCH_UTC != "":
             csvwriter.writerow(utf8IDList)
-        else:
-            print("Your password is dead or something like that, please go check your logs")
-            quit()
-    output.close()
 
     # Delete the XML
     os.remove("ScanSchedules.xml")
