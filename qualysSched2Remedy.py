@@ -207,8 +207,10 @@ def qualys2remedy():
                     Change_Start_Time = dt - datetime.timedelta(hours=5)
                     resultrow['Change_Start_Time'] = str(Change_Start_Time).replace(' ','T')+configFile['timeChange']
                     
+                matched = False
                 for key in scans['SCAN_LIST_OUTPUT']['RESPONSE']['SCAN_LIST']['SCAN']:
                     if currentOne[1].replace(' ','') == key['TITLE'].replace(' ',''):
+                        matched = True
                         if key['DURATION'] != "Pending":
                             if "day" in key['DURATION']:
                                 day = key['DURATION'].split('day')
@@ -222,8 +224,10 @@ def qualys2remedy():
                                 durSeconds = (duration.hour * 60 + duration.minute) * 60 + duration.second
                                 resultrow['Change_Stop_Time'] = str(Change_Start_Time + datetime.timedelta(seconds=durSeconds)).replace(' ','T')+"-05:00"
                         else:    
-                            resultrow['Change_Stop_Time'] = str(Change_Start_Time + datetime.timedelta(hours=4)).replace(' ','T')+"-05:00"    
-                            
+                            resultrow['Change_Stop_Time'] = str(Change_Start_Time + datetime.timedelta(hours=4)).replace(' ','T')+"-05:00"  
+                if matched == False:
+                    resultrow['Change_Stop_Time'] = str(Change_Start_Time + datetime.timedelta(hours=4)).replace(' ','T')+"-05:00"
+                    
                 if resultrow['prodvsqa'] == 'PROD':
                     prodvsqa = 'PROD'
                 else:
