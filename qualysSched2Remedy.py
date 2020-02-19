@@ -149,13 +149,18 @@ def qualys2remedy():
             csvwriter.writerow(utf8IDList)
 
     # Delete the XML
-    os.remove("ScanSchedules.xml")
-    
     newshit = []
     now = datetime.datetime.now()
     with open('ScanSchedules_last.csv', 'r') as t1, open('ScanSchedules.csv', 'r') as t2:
         fileone = t1.readlines()
         filetwo = t2.readlines()
+        print(len(fileone))
+        print(len(filetwo))
+        if len(fileone) == 1:
+            os.remove('ScanSchedules.csv')
+            shutil.move('ScanSchedules_last.csv', 'ScanSchedules.csv')
+            print("No luck in downloading a CSV")
+            quit()
     for line in filetwo:
         compare = line.split(',')
         if "Change_Start_Time" not in compare[4]:
